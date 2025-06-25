@@ -29,6 +29,7 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
 
   // rectsData를 상태로 관리
   const [rectsData, setRectsData] = useState([]);
+  const [activeRect, setActiveRect] = useState(null);
   useEffect(() => {
     // 카테고리/소카테고리/rects가 바뀔 때마다 rectsData를 항상 2d 이미지로 초기화
     setRectsData(Array.from({ length: rects }, (_, i) => {
@@ -104,6 +105,7 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
 
   // 사각형 클릭 핸들러: 이미지 즉시 변경
   const handleRectClick = (i) => {
+    setActiveRect(prev => (prev === i ? null : i)); // 토글
     setRectsData(prev => prev.map((r, idx) => {
       if (idx !== i) return r;
       let newImg = r.img;
@@ -200,6 +202,8 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
                 transformOrigin: '50% 0%', // 위쪽 피봇
                 cursor: 'pointer',
                 userSelect: 'none',
+                border: activeRect === i ? '3px solid #2196f3' : 'none',
+                boxShadow: activeRect === i ? '0 0 0 4px #2196f355' : undefined,
                 ...(isCenter ? { transform: `${spring.transform ? spring.transform : ''} scale(1.25)` } : {}),
               }}
               onClick={() => handleRectClick(i)}
@@ -235,6 +239,204 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
                   ...(rectsData[i]?.img.includes('3.png') ? { transform: 'scale(2)' } : {}),
                 }}
               />
+              {/* map이 보이는 순간, b1 이미지 옆에 b1t 이미지 표시 */}
+              {hasMappedImg && rectsData[i]?.img === '/basic/b1.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/b1t.png"
+                    alt="b1t"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                  <div style={{
+                    color: '#fff',
+                    fontSize: 15,
+                    marginTop: 10,
+                    textAlign: 'center',
+                    fontWeight: 400,
+                    textShadow: '0 2px 8px #000a',
+                    maxWidth: 180,
+                  }}>
+                    베이직 라인 중 가장 인기가 많은 청자켓 시온!<br/>편하게 입기 최고인 상의
+                  </div>
+                </div>
+              )}
+              {/* 베이직 라인 각 선택지별 태그 이미지 */}
+              {hasMappedImg && rectsData[i]?.img === '/basic/b2.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/22.png"
+                    alt="22"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {hasMappedImg && rectsData[i]?.img === '/basic/b3.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/33.png"
+                    alt="33"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {hasMappedImg && rectsData[i]?.img === '/basic/b4.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/44.png"
+                    alt="44"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {/* 여행용 단기 각 선택지별 태그 이미지 */}
+              {hasMappedImg && rectsData[i]?.img === '/tri/t1.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/bo1.png"
+                    alt="bo1"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {hasMappedImg && rectsData[i]?.img === '/tri/t2.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/bo2.png"
+                    alt="bo2"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {hasMappedImg && rectsData[i]?.img === '/tri/t3.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/bo3.png"
+                    alt="bo3"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {hasMappedImg && rectsData[i]?.img === '/tri/t4.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/bo4.png"
+                    alt="bo4"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
             </animated.div>
           );
         })}
@@ -284,26 +486,22 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
       {hasMappedImg && (
         <div style={{
           position: 'fixed',
-          right: 40,
+          right: 340,
           top: 'calc(50% + 80px)',
           transform: 'translateY(-50%)',
-          width: 340,
+          width: 300,
           height: 340,
-          background: '#fff',
-          borderRadius: 32,
-          boxShadow: '0 2px 8px #0003',
-          border: '2px solid #eee',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 100,
-          flexDirection: 'column',
           opacity: hasMappedImg ? 1 : 0,
           transition: 'opacity 0.4s',
           pointerEvents: hasMappedImg ? 'auto' : 'none',
         }}>
           <div style={{ position: 'relative', width: 300, height: 300 }}>
-            <img src="/2d/map.png" alt="map" style={{ width: 300, height: 300, objectFit: 'cover', borderRadius: 24 }} />
+            <img src="/2d/map.png" alt="map" style={{ width: 300, height: 300, objectFit: 'cover' }} />
             {/* 핀 아이콘 */}
             <div style={{
               position: 'absolute',
@@ -315,13 +513,14 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
               filter: 'drop-shadow(0 2px 8px #0006)',
             }}>📍</div>
           </div>
-          {/* 스테이션 텍스트 (이미지 아래, 작고 흰색) */}
+          {/* 스테이션 텍스트 (이미지 아래, 흰색) */}
           <div style={{
-            color: '#1a237e',
+            color: '#fff',
             fontSize: 15,
             fontWeight: 400,
             marginTop: 10,
             textAlign: 'center',
+            textShadow: '0 2px 8px #000a',
           }}>
             석관동 한예종 스테이션
           </div>
@@ -338,8 +537,8 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
           color: '#fff',
           border: 'none',
           borderRadius: 32,
-          padding: '18px 38px',
-          fontSize: 20,
+          padding: '14px 28px',
+          fontSize: 16,
           fontWeight: 700,
           boxShadow: '0 4px 24px #ff980055',
           cursor: 'pointer',

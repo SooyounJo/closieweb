@@ -315,24 +315,6 @@ export default function Home() {
           categoryLabel={categoryIdx !== null ? CATEGORIES[categoryIdx].label : undefined}
         />
         <RequireCategoryModal open={showRequireCategory} onClose={() => setShowRequireCategory(false)} />
-        {/* 옷장이 1개만 남았을 때 하단에 지역명 표시 */}
-        {showRegion && (
-          <div style={{
-            position: 'fixed',
-            left: 0,
-            right: 0,
-            bottom: 24,
-            textAlign: 'center',
-            color: '#fff',
-            fontSize: 20,
-            fontWeight: 'bold',
-            textShadow: '0 2px 8px #000a',
-            zIndex: 50,
-            letterSpacing: 2,
-          }}>
-            {showRegion} 지역 옷장
-          </div>
-        )}
         {showGuide && <ControlGuideModal onClose={() => setShowGuide(false)} />}
       </div>
       <style jsx global>{`
