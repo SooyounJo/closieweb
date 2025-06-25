@@ -6,8 +6,8 @@ import MovingRects from '../components/MovingRects';
 const ZOOM_LABELS = ['서울', '성북구', '석관동'];
 const CATEGORIES = [
   { label: '계절의 특수성', rects: 2, options: ['봄', '여름', '가을', '겨울'] },
-  { label: '새로운 도전', rects: 3, options: ['스트릿', '포멀', '캐주얼', '빈티지'] },
-  { label: '여행용 단기', rects: 2, options: ['비즈니스', '휴양지', '백패킹', '도심'] },
+  { label: '새로운 도전', rects: 3, options: ['스트릿', '파격', '캐주얼', '빈티지'] },
+  { label: '여행용 단기', rects: 2, options: ['도시', '자연', '활동적인', '휴양'] },
   { label: '특수정장', rects: 1, options: [] },
   { label: '베이직 라인', rects: 4, options: ['상의', '하의', '겉옷', '악세서리'] },
 ];
@@ -163,6 +163,12 @@ export default function Home() {
     setRectCountOverride(null);
   }, [categoryIdx]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('introSeen')) {
+      window.location.replace('/intro');
+    }
+  }, []);
+
   return (
     <>
       <Head>
@@ -261,7 +267,7 @@ export default function Home() {
           {subOptions.length > 0 && (
             <div style={{
               display: 'flex',
-              gap: 12,
+              gap: 8,
               marginTop: 18,
               justifyContent: 'center',
               opacity: subAnim ? 1 : 0,
@@ -285,10 +291,10 @@ export default function Home() {
                     background: '#ff9800',
                     color: '#fff',
                     border: 'none',
-                    borderRadius: 12,
-                    padding: '10px 28px',
+                    borderRadius: 8,
+                    padding: '8px 16px',
                     fontWeight: 'bold',
-                    fontSize: 16,
+                    fontSize: 15,
                     boxShadow: '0 2px 8px #ff980055',
                     cursor: 'pointer',
                     letterSpacing: 1,
@@ -306,6 +312,7 @@ export default function Home() {
           rectCount={rectCount}
           subCategory={rectCount === 1 ? subCategory : undefined}
           onRequireCategory={categoryIdx === null ? () => setShowRequireCategory(true) : undefined}
+          categoryLabel={categoryIdx !== null ? CATEGORIES[categoryIdx].label : undefined}
         />
         <RequireCategoryModal open={showRequireCategory} onClose={() => setShowRequireCategory(false)} />
         {/* 옷장이 1개만 남았을 때 하단에 지역명 표시 */}

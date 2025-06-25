@@ -7,7 +7,12 @@ export default function Intro() {
   const [started, setStarted] = useState(false);
 
   // 터치/클릭 시 메인 화면으로 전환
-  const handleStart = () => setStarted(true);
+  const handleStart = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('introSeen', 'true');
+    }
+    setStarted(true);
+  };
 
   return (
     <>
@@ -88,7 +93,12 @@ export default function Intro() {
             </div>
             {/* 하단 '클로지를 찾으러 가기' 버튼 */}
             <button
-              onClick={() => router.push('/')}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('introSeen', 'true');
+                }
+                router.push('/');
+              }}
               style={{
                 position: 'fixed',
                 left: '50%',

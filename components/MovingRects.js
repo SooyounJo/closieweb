@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSprings, animated } from 'react-spring';
 import { useRouter } from 'next/router';
 
@@ -18,7 +18,7 @@ const CLOTHES_IMAGES = [
   'https://cdn-icons-png.flaticon.com/512/892/892467.png',
 ];
 
-export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, subCategory }) {
+export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, subCategory, categoryLabel }) {
   const router = useRouter();
   const zoom = ZOOM_LEVELS[zoomLevel] || ZOOM_LEVELS[0];
   const rects = rectCount ?? zoom.rects;
@@ -27,34 +27,56 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
   const gap = rectWidth * 0.2;
   const railLength = rects * (rectWidth + gap);
 
-  const subCategoryImageMap = {
-    '봄': 1, '여름': 2, '가을': 3, '겨울': 4,
-    '스트릿': 5, '포멀': 6, '캐주얼': 7, '빈티지': 8,
-    '비즈니스': 9, '휴양지': 10, '백패킹': 1, '도심': 2,
-    '상의': 3, '하의': 4, '겉옷': 5, '악세서리': 6
-  };
-  const rectsData = useMemo(() => {
-    return Array.from({ length: rects }, (_, i) => {
-      // 거리: 왼쪽(가까움), 오른쪽(멀음)
-      const distanceRank = i + 1; // 왼쪽이 1(가장 가까움)
+  // rectsData를 상태로 관리
+  const [rectsData, setRectsData] = useState([]);
+  useEffect(() => {
+    // 카테고리/소카테고리/rects가 바뀔 때마다 rectsData를 항상 2d 이미지로 초기화
+    setRectsData(Array.from({ length: rects }, (_, i) => {
+      const distanceRank = i + 1;
       const distanceLabel = i === 0 ? '가장 가까움' : i === rects - 1 ? '가장 멀리 있음' : `${distanceRank}번째로 가까움`;
-      // 위치: baseLat/baseLng에서 약간씩 변화
       const lat = zoom.baseLat + (i - rects / 2) * 0.002;
       const lng = zoom.baseLng + (i - rects / 2) * 0.002;
-      // 키워드: zoomLevel에 따라 다름
       const keyword = zoom.keyword;
-      // 이미지/설명 예시
-      let img;
-      if (subCategory && rects === 1) {
-        const imgIdx = subCategoryImageMap[subCategory] || 1;
-        img = `/2d/${imgIdx}.png`;
-      } else {
-        img = `/2d/${(i % 10) + 1}.png`;
-      }
-      const desc = `${keyword} 지역 ${distanceLabel}의 추천 옷입니다.`;
-      return { img, desc, lat, lng, distanceLabel, keyword, idx: i };
-    });
-  }, [rects, zoom, subCategory]);
+      return {
+        img: `/2d/${(i % 10) + 1}.png`,
+        desc: `${keyword} 지역 ${distanceLabel}의 추천 옷입니다.`,
+        lat, lng, distanceLabel, keyword, idx: i
+      };
+    }));
+  }, [rects, zoom, categoryLabel, subCategory]);
+
+  // 특수정장(포멀) 카테고리 클릭 시 바로 fo.png로 변경
+  useEffect(() => {
+    if (categoryLabel === '특수정장') {
+      setRectsData(prev => prev.map(r => ({ ...r, img: '/basic/fo.png' })));
+    }
+  }, [categoryLabel]);
+
+  // 소분류별 이미지 매핑
+  const basicMap = {
+    '상의': '/basic/b1.png',
+    '하의': '/basic/b2.png',
+    '겉옷': '/basic/b3.png',
+    '악세서리': '/basic/b4.png',
+  };
+  const weaMap = {
+    '봄': '/wea/w1.png',
+    '여름': '/wea/w2.png',
+    '가을': '/wea/w3.png',
+    '겨울': '/wea/w4.png',
+  };
+  const challengeMap = {
+    '스트릿': '/sp/s1.png',
+    '파격': '/sp/s2.png',
+    '캐주얼': '/sp/s3.png',
+    '빈티지': '/sp/s4.png',
+  };
+  const travelMap = {
+    '도시': '/tri/t1.png',
+    '자연': '/tri/t2.png',
+    '활동적인': '/tri/t3.png',
+    '휴양': '/tri/t4.png',
+  };
 
   // 각 사각형의 x 위치를 계산
   const positions = useMemo(
@@ -80,15 +102,27 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
     delay: index * 80,
   }), [positions, rects, randomAngles]);
 
-  // 사각형 클릭 핸들러: 해당 옷/설명/위치/거리/키워드 정보를 쿼리스트링으로 전달
+  // 사각형 클릭 핸들러: 이미지 즉시 변경
   const handleRectClick = (i) => {
-    if (typeof onRequireCategory === 'function') {
-      onRequireCategory(i, rectsData[i]);
-      return;
-    }
-    const d = rectsData[i];
-    router.push(`/close?img=${encodeURIComponent(d.img)}&desc=${encodeURIComponent(d.desc)}&lat=${d.lat}&lng=${d.lng}&distance=${encodeURIComponent(d.distanceLabel)}&keyword=${encodeURIComponent(d.keyword)}`);
+    setRectsData(prev => prev.map((r, idx) => {
+      if (idx !== i) return r;
+      let newImg = r.img;
+      if (categoryLabel === '베이직 라인' && basicMap[subCategory]) {
+        newImg = basicMap[subCategory];
+      } else if (categoryLabel === '계절의 특수성' && weaMap[subCategory]) {
+        newImg = weaMap[subCategory];
+      } else if (categoryLabel === '새로운 도전' && challengeMap[subCategory]) {
+        newImg = challengeMap[subCategory];
+      } else if (categoryLabel === '여행용 단기' && travelMap[subCategory]) {
+        newImg = travelMap[subCategory];
+      }
+      return { ...r, img: newImg };
+    }));
   };
+
+  // map.png 고정 박스 조건부 렌더링
+  const is2dImg = img => /^\/2d\/[1-9]0?\.png$/.test(img);
+  const hasMappedImg = rectsData.length > 0 && rectsData.some(r => !is2dImg(r.img));
 
   return (
     <div style={{
@@ -172,7 +206,7 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
               tabIndex={0}
               role="button"
               aria-label={`closie station ${i + 1}`}
-              title={rectsData[i].desc}
+              title={rectsData[i]?.desc}
             >
               <img
                 src="/2d/ziphe.png"
@@ -191,59 +225,131 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
                 }}
               />
               <img
-                src={rectsData[i].img}
-                alt={rectsData[i].desc}
+                src={rectsData[i]?.img}
+                alt={rectsData[i]?.desc}
                 style={{
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
                   display: 'block',
-                  ...(rectsData[i].img.includes('3.png') ? { transform: 'scale(2)' } : {}),
+                  ...(rectsData[i]?.img.includes('3.png') ? { transform: 'scale(2)' } : {}),
                 }}
               />
             </animated.div>
           );
         })}
-        {/* 하단 거리 라벨 박스 */}
-        <div style={{
-          position: 'absolute',
-          left: 0,
-          bottom: -70,
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          pointerEvents: 'none',
-          zIndex: 30,
-        }}>
+        {/* 하단 거리 라벨 박스 (옷장이 3개 이상일 때만 표시) */}
+        {rects > 2 ? (
           <div style={{
-            background: 'rgba(255,255,255,0.65)',
-            color: '#222',
-            fontSize: 18,
-            fontWeight: 'bold',
-            borderRadius: 16,
-            padding: '8px 24px',
-            boxShadow: '0 2px 8px #0002',
-            marginLeft: 8,
-            userSelect: 'none',
+            position: 'absolute',
+            left: 0,
+            bottom: -70,
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            pointerEvents: 'none',
+            zIndex: 30,
           }}>
-            먼 곳
+            <div style={{
+              background: 'rgba(255,255,255,0.65)',
+              color: '#222',
+              fontSize: 18,
+              fontWeight: 'bold',
+              borderRadius: 16,
+              padding: '8px 24px',
+              boxShadow: '0 2px 8px #0002',
+              marginLeft: 8,
+              userSelect: 'none',
+            }}>
+              먼 곳
+            </div>
+            <div style={{
+              background: 'rgba(255,255,255,0.65)',
+              color: '#222',
+              fontSize: 18,
+              fontWeight: 'bold',
+              borderRadius: 16,
+              padding: '8px 24px',
+              boxShadow: '0 2px 8px #0002',
+              marginRight: 8,
+              userSelect: 'none',
+            }}>
+              가까운 곳
+            </div>
           </div>
+        ) : null}
+      </div>
+      {/* map.png 고정 박스 */}
+      {hasMappedImg && (
+        <div style={{
+          position: 'fixed',
+          right: 40,
+          top: 'calc(50% + 80px)',
+          transform: 'translateY(-50%)',
+          width: 340,
+          height: 340,
+          background: '#fff',
+          borderRadius: 32,
+          boxShadow: '0 2px 8px #0003',
+          border: '2px solid #eee',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100,
+          flexDirection: 'column',
+          opacity: hasMappedImg ? 1 : 0,
+          transition: 'opacity 0.4s',
+          pointerEvents: hasMappedImg ? 'auto' : 'none',
+        }}>
+          <div style={{ position: 'relative', width: 300, height: 300 }}>
+            <img src="/2d/map.png" alt="map" style={{ width: 300, height: 300, objectFit: 'cover', borderRadius: 24 }} />
+            {/* 핀 아이콘 */}
+            <div style={{
+              position: 'absolute',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-40%, -60%)',
+              fontSize: 38,
+              zIndex: 2,
+              filter: 'drop-shadow(0 2px 8px #0006)',
+            }}>📍</div>
+          </div>
+          {/* 스테이션 텍스트 (이미지 아래, 작고 흰색) */}
           <div style={{
-            background: 'rgba(255,255,255,0.65)',
-            color: '#222',
-            fontSize: 18,
-            fontWeight: 'bold',
-            borderRadius: 16,
-            padding: '8px 24px',
-            boxShadow: '0 2px 8px #0002',
-            marginRight: 8,
-            userSelect: 'none',
+            color: '#1a237e',
+            fontSize: 15,
+            fontWeight: 400,
+            marginTop: 10,
+            textAlign: 'center',
           }}>
-            가까운 곳
+            석관동 한예종 스테이션
           </div>
         </div>
-      </div>
+      )}
+      {/* 우측 하단 처음으로 돌아가기 버튼 */}
+      <button
+        onClick={() => window.location.reload()}
+        style={{
+          position: 'fixed',
+          right: 40,
+          bottom: 40,
+          background: '#ff9800',
+          color: '#fff',
+          border: 'none',
+          borderRadius: 32,
+          padding: '18px 38px',
+          fontSize: 20,
+          fontWeight: 700,
+          boxShadow: '0 4px 24px #ff980055',
+          cursor: 'pointer',
+          zIndex: 2000,
+          letterSpacing: 1,
+          transition: 'background 0.2s',
+        }}
+      >
+        처음으로 돌아가기
+      </button>
     </div>
   );
 } 
