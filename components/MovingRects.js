@@ -232,10 +232,11 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
                 src={rectsData[i]?.img}
                 alt={rectsData[i]?.desc}
                 style={{
-                  width: '100%',
-                  height: '100%',
+                  width: rectsData[i]?.img === '/tri/t3.png' ? 120 : '100%',
+                  height: rectsData[i]?.img === '/tri/t3.png' ? 120 : '100%',
                   objectFit: 'contain',
                   display: 'block',
+                  marginTop: rectsData[i]?.img === '/tri/t3.png' ? 40 : 0,
                   ...(rectsData[i]?.img.includes('3.png') ? { transform: 'scale(2)' } : {}),
                 }}
               />
@@ -428,6 +429,216 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
                   <img
                     src="/1tag/bo4.png"
                     alt="bo4"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {/* 새로운 도전 각 선택지별 태그 이미지 */}
+              {hasMappedImg && rectsData[i]?.img === '/sp/s1.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/tt1.png"
+                    alt="tt1"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {hasMappedImg && rectsData[i]?.img === '/sp/s2.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/tt2.png"
+                    alt="tt2"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {hasMappedImg && rectsData[i]?.img === '/sp/s3.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/tt3.png"
+                    alt="tt3"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {hasMappedImg && rectsData[i]?.img === '/sp/s4.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/tt4.png"
+                    alt="tt4"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {/* 특수정장(포멀) 태그 이미지 */}
+              {hasMappedImg && rectsData[i]?.img === '/basic/fo.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/foo.png"
+                    alt="foo"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {/* 계절특성 태그 이미지 */}
+              {hasMappedImg && rectsData[i]?.img === '/wea/w1.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/c1.png"
+                    alt="c1"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {hasMappedImg && rectsData[i]?.img === '/wea/w2.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/c2.png"
+                    alt="c2"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {hasMappedImg && rectsData[i]?.img === '/wea/w3.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/c3.png"
+                    alt="c3"
+                    style={{
+                      width: 160,
+                      height: 160,
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+              )}
+              {hasMappedImg && rectsData[i]?.img === '/wea/w4.png' && (
+                <div style={{
+                  position: 'absolute',
+                  left: -280,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 20,
+                }}>
+                  <img
+                    src="/1tag/c4.png"
+                    alt="c4"
                     style={{
                       width: 160,
                       height: 160,
