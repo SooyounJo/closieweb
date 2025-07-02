@@ -109,7 +109,12 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
       onRequireCategory();
       return;
     }
-    setActiveRect(i); // 중앙 이동만
+    setActiveRect(i); // 중앙 이동
+    // 옷장 클릭 시 bu/1~4에 따라 각 fullview 페이지로 이동
+    if (typeof subCategory === 'number') {
+      const page = ['/fullview1','/fullview2','/fullview3','/fullview4'][subCategory];
+      if (page) router.push(page);
+    }
   };
 
   // map.png 고정 박스 조건부 렌더링

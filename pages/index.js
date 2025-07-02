@@ -204,6 +204,26 @@ export default function Home() {
   const startX = useRef(0);
   const lastX = useRef(0);
   const [windowWidth, setWindowWidth] = useState(1200);
+  const [fullImage, setFullImage] = useState(null);
+  const [bgOrange, setBgOrange] = useState(false);
+
+  const BU_IMAGES = [
+    ['/new/comon.png'],
+    ['/new/tr1.png', '/new/tr2.png'],
+    ['/new/go1.png', '/new/go2.png'],
+    ['/new/foma.png', '/new/foma2.png'],
+  ];
+
+  const handleWardrobeClick = () => {
+    if (subCategory === null) return;
+    const imgs = BU_IMAGES[subCategory];
+    const img = subCategory === 0 ? imgs[0] : imgs[Math.floor(Math.random() * imgs.length)];
+    setFullImage(img);
+  };
+
+  useEffect(() => {
+    setBgOrange(subCategory === 0);
+  }, [subCategory]);
 
   // 슬라이더로 zoom in/out
   const handleSlider = (e) => {
@@ -280,7 +300,7 @@ export default function Home() {
           </span>
         </div>
       </div>
-      <div className="ipad-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', position: 'relative', background: 'url(/back.png) center center / cover no-repeat' }}>
+      <div className="ipad-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', position: 'relative', background: bgOrange ? '#ff9800' : 'url(/back.png) center center / cover no-repeat', transition: 'background 0.3s' }}>
         {/* 상단 뒤로 가기 버튼 */}
         <button
           onClick={() => router.push('/intro')}
@@ -308,7 +328,7 @@ export default function Home() {
           </svg>
         </button>
         {/* 우측 상단 고정 bu/1~4.png 이미지 버튼 */}
-        <div style={{ position: 'fixed', top: 64, right: 32, zIndex: 200, display: 'flex', gap: 32, pointerEvents: 'auto' }}>
+        <div style={{ position: 'fixed', top: 64, left: '50%', transform: 'translateX(-50%)', zIndex: 200, display: 'flex', gap: 32, pointerEvents: 'auto' }}>
           {[1,2,3,4].map((num, idx) => (
             <button
               key={num}
@@ -325,9 +345,17 @@ export default function Home() {
                 outline: 'none',
                 borderRadius: 0,
                 boxShadow: 'none',
-                transition: 'none',
+                transition: 'transform 0.18s, box-shadow 0.18s',
               }}
               aria-label={`카테고리 ${idx+1}`}
+              onMouseEnter={e => {
+                e.currentTarget.firstChild.style.transform = 'scale(1.08)';
+                e.currentTarget.firstChild.style.boxShadow = '0 4px 24px #ff980088, 0 0 0 3px #ff9800';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.firstChild.style.transform = '';
+                e.currentTarget.firstChild.style.boxShadow = '';
+              }}
             >
               <img
                 src={`/bu/${num}.png`}
@@ -339,7 +367,7 @@ export default function Home() {
                   borderRadius: 0,
                   border: 'none',
                   background: 'none',
-                  transition: 'none',
+                  transition: 'transform 0.18s, box-shadow 0.18s',
                   display: 'block',
                 }}
               />
@@ -352,6 +380,7 @@ export default function Home() {
           subCategory={rectCount === 1 ? subCategory : undefined}
           onRequireCategory={categoryIdx === null ? () => setShowRequireCategory(true) : undefined}
           categoryLabel={categoryIdx !== null ? CATEGORIES[categoryIdx].label : undefined}
+          onWardrobeClick={handleWardrobeClick}
         />
         <RequireCategoryModal open={showRequireCategory} onClose={() => setShowRequireCategory(false)} />
       </div>
@@ -376,8 +405,26 @@ export default function Home() {
         <span style={{ fontSize: 15, color: '#fff', opacity: 0.7 }}>(서울 → 성북구 → 석관동, 카테고리별 분류)</span>
       </div>
       {/* 좌측 위, 우측 위 오렌지색 안내문구 */}
-      <div style={{ position: 'fixed', top: 16, left: 32, color: '#ff9800', fontWeight: 'bold', fontSize: 22, zIndex: 300, textShadow: '0 2px 8px #fff8' }}>먼 클로지까지 확인</div>
-      <div style={{ position: 'fixed', top: 16, right: 32, color: '#ff9800', fontWeight: 'bold', fontSize: 22, zIndex: 300, textShadow: '0 2px 8px #fff8' }}>가까운 클로지</div>
+      <div style={{ position: 'fixed', top: 80, left: 32, color: '#ff9800', fontWeight: 'bold', fontSize: 22, zIndex: 300, textShadow: '0 2px 8px #fff8' }}>먼 클로지까지 확인</div>
+      <div style={{ position: 'fixed', top: 80, right: 32, color: '#ff9800', fontWeight: 'bold', fontSize: 22, zIndex: 300, textShadow: '0 2px 8px #fff8' }}>가까운 클로지</div>
+      {/* 옷장 클릭 시 전체화면 이미지 */}
+      {fullImage && (
+        <div style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          width: '100vw',
+          height: '100vh',
+          background: '#000',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+        }} onClick={() => setFullImage(null)}>
+          <img src={fullImage} alt="full" style={{ width: '100vw', height: '100vh', objectFit: 'cover', maxWidth: '100vw', maxHeight: '100vh' }} />
+        </div>
+      )}
     </>
   );
 } 
