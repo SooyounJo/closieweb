@@ -22,8 +22,8 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
   const router = useRouter();
   const zoom = ZOOM_LEVELS[zoomLevel] || ZOOM_LEVELS[0];
   const rects = rectCount ?? zoom.rects;
-  const rectWidth = 160;
-  const rectHeight = 320;
+  const rectWidth = 240;
+  const rectHeight = 480;
   const gap = rectWidth * 0.2;
   const railLength = rects * (rectWidth + gap);
 
@@ -103,23 +103,13 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
     delay: index * 80,
   }), [positions, rects, randomAngles]);
 
-  // 사각형 클릭 핸들러: 이미지 즉시 변경
+  // 사각형 클릭 핸들러: 이미지 즉시 변경 → 카테고리 미선택 시 모달 호출, 아니면 중앙 이동만
   const handleRectClick = (i) => {
-    setActiveRect(prev => (prev === i ? null : i)); // 토글
-    setRectsData(prev => prev.map((r, idx) => {
-      if (idx !== i) return r;
-      let newImg = r.img;
-      if (categoryLabel === '베이직 라인' && basicMap[subCategory]) {
-        newImg = basicMap[subCategory];
-      } else if (categoryLabel === '계절의 특수성' && weaMap[subCategory]) {
-        newImg = weaMap[subCategory];
-      } else if (categoryLabel === '새로운 도전' && challengeMap[subCategory]) {
-        newImg = challengeMap[subCategory];
-      } else if (categoryLabel === '여행용 단기' && travelMap[subCategory]) {
-        newImg = travelMap[subCategory];
-      }
-      return { ...r, img: newImg };
-    }));
+    if (!categoryLabel && typeof onRequireCategory === 'function') {
+      onRequireCategory();
+      return;
+    }
+    setActiveRect(i); // 중앙 이동만
   };
 
   // map.png 고정 박스 조건부 렌더링
@@ -161,18 +151,19 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
         position: 'relative',
         justifyContent: 'center',
         zIndex: 12,
+        marginTop: 240,
       }}>
         {/* 레일 (위쪽) */}
         <div
           style={{
             position: 'fixed',
             left: 0,
-            top: '200px',
+            top: '240px',
             width: '100vw',
-            height: 18,
+            height: 54,
             backgroundImage: "url('/2d/zip.png')",
             backgroundRepeat: 'repeat-x',
-            backgroundSize: 'auto 18px',
+            backgroundSize: 'auto 54px',
             zIndex: 0,
             pointerEvents: 'none',
             userSelect: 'none',
@@ -182,7 +173,7 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
         {springs.map((spring, i) => {
           // 중앙 인덱스 계산
           const centerIdx = Math.floor(rects / 2);
-          const isCenter = i === centerIdx;
+          const isCenter = activeRect === i;
           return (
             <animated.div
               key={i}
@@ -197,14 +188,12 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
                 zIndex: 1,
                 position: 'absolute',
                 left: 0,
-                top: 18, // 레일 바로 아래에 붙음
+                top: 0, // ziphe.png와 스냅
                 willChange: 'transform',
                 transformOrigin: '50% 0%', // 위쪽 피봇
                 cursor: 'pointer',
                 userSelect: 'none',
-                border: activeRect === i ? '3px solid #2196f3' : 'none',
-                boxShadow: activeRect === i ? '0 0 0 4px #2196f355' : undefined,
-                ...(isCenter ? { transform: `${spring.transform ? spring.transform : ''} scale(1.25)` } : {}),
+                ...(isCenter ? { transform: `${spring.transform ? spring.transform : ''} scale(1.5)` } : {}),
               }}
               onClick={() => handleRectClick(i)}
               tabIndex={0}
@@ -217,7 +206,7 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
                 alt="집게"
                 style={{
                   position: 'absolute',
-                  top: -8,
+                  top: 0,
                   left: '50%',
                   width: rectWidth * 0.35,
                   height: 'auto',

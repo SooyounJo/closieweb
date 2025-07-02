@@ -56,7 +56,7 @@ export default function Intro() {
             position: 'absolute',
             left: 0,
             width: '100%',
-            bottom: '16%',
+            bottom: '8%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -68,8 +68,22 @@ export default function Intro() {
             animation: 'fadeIn 1s',
             userSelect: 'none',
           }}>
-            <div style={{ marginBottom: 14, fontSize: 30, animation: 'tapHand 1.2s infinite alternate' }}>👆</div>
-            화면을 터치해 시작하기
+            {/* da.png 이미지 터치해야만 시작 */}
+            <img
+              src="/da.png"
+              alt="터치 시작"
+              style={{
+                width: 120,
+                height: 120,
+                marginBottom: 14,
+                cursor: 'pointer',
+                animation: 'tapHand 1.2s infinite alternate',
+                zIndex: 11,
+              }}
+              onClick={handleStart}
+              onTouchStart={handleStart}
+            />
+            <div style={{ marginTop: 24 }}>화면을 터치해 시작하기</div>
           </div>
         )}
         {/* 메인 컨텐츠 (started 상태에서만) */}
@@ -86,12 +100,12 @@ export default function Intro() {
             >
               Find your closie
             </h1>
-            <div style={{ fontSize: 15, lineHeight: 1.6, maxWidth: 340, color: '#e0e0e0', margin: '0 auto 40px auto' }}>
+            <div style={{ fontSize: 20, lineHeight: 1.6, maxWidth: 420, color: '#e0e0e0', margin: '0 auto 40px auto', background: 'rgba(24,28,36,0.92)', borderRadius: 18, padding: '18px 32px', textAlign: 'center', boxShadow: '0 4px 24px #0004' }}>
               가장 가까운 클로지 스테이션부터,<br />
               멀리 있는 스테이션에 살고 있는 친구들 중<br />
               <b>나랑 가장 잘 맞을 클로지</b>를 찾아보세요!
             </div>
-            {/* 하단 '클로지를 찾으러 가기' 버튼 */}
+            {/* 하단 고정 주황색 버튼 */}
             <button
               onClick={() => {
                 if (typeof window !== 'undefined') {
@@ -102,22 +116,22 @@ export default function Intro() {
               style={{
                 position: 'fixed',
                 left: '50%',
-                bottom: 88,
+                bottom: 48,
                 transform: 'translateX(-50%)',
                 background: '#ff9800',
                 color: '#fff',
                 border: 'none',
                 borderRadius: 16,
-                padding: '14px 36px',
-                fontSize: 17,
+                padding: '18px 48px',
+                fontSize: 20,
                 fontWeight: 'bold',
                 cursor: 'pointer',
                 boxShadow: '0 4px 24px #ff980055',
-                zIndex: 3,
+                zIndex: 30,
                 letterSpacing: 1,
               }}
             >
-              클로지를 찾으러 가기
+              찾으러 가기
             </button>
           </div>
         )}

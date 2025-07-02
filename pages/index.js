@@ -1,6 +1,7 @@
+import React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import MovingRects from '../components/MovingRects';
 
 const ZOOM_LABELS = ['서울', '성북구', '석관동'];
@@ -121,6 +122,75 @@ function RequireCategoryModal({ open, onClose }) {
   );
 }
 
+// 상단 zip.png 위에서 point.png를 드래그해 zoomLevel을 조절하는 컴포넌트
+function SliderPoint({ zipWidth, zoomLevel, setZoomLevel }) {
+  // 슬라이더 구간: 0~2 (3단계)
+  const min = 0, max = 2;
+  const [dragging, setDragging] = React.useState(false);
+  // 슬라이더 위치 계산
+  const getLeft = (level) => {
+    const margin = 60; // zip.png 양 끝 여백
+    const usable = zipWidth - margin * 2;
+    return margin + (usable / (max - min)) * level;
+  };
+  // 드래그 핸들러
+  const onDown = (e) => {
+    setDragging(true);
+    document.body.style.userSelect = 'none';
+  };
+  const onMove = (e) => {
+    if (!dragging) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const margin = 60;
+    const usable = zipWidth - margin * 2;
+    let x = clientX - margin;
+    x = Math.max(0, Math.min(usable, x));
+    const level = Math.round((x / usable) * (max - min));
+    setZoomLevel(level);
+  };
+  const onUp = () => {
+    setDragging(false);
+    document.body.style.userSelect = '';
+  };
+  React.useEffect(() => {
+    if (!dragging) return;
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchend', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchend', onUp);
+    };
+  }, [dragging]);
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: 54, zIndex: 150, pointerEvents: 'none' }}>
+      <img
+        src="/point.png"
+        alt="슬라이더 포인트"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: getLeft(zoomLevel),
+          width: 54,
+          height: 54,
+          transform: 'translateY(-30%)',
+          zIndex: 151,
+          cursor: 'grab',
+          pointerEvents: 'auto',
+          userSelect: 'none',
+          transition: dragging ? 'none' : 'left 0.2s',
+        }}
+        onMouseDown={onDown}
+        onTouchStart={onDown}
+        draggable={false}
+      />
+    </div>
+  );
+}
+
 export default function Home() {
   const [zoomLevel, setZoomLevel] = useState(0);
   const [categoryIdx, setCategoryIdx] = useState(null); // null이면 zoomLevel 사용
@@ -129,6 +199,11 @@ export default function Home() {
   const [rectCountOverride, setRectCountOverride] = useState(null);
   const [showRequireCategory, setShowRequireCategory] = useState(false);
   const [subCategory, setSubCategory] = useState(null);
+  const [zipX, setZipX] = useState(0);
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const lastX = useRef(0);
+  const [windowWidth, setWindowWidth] = useState(1200);
 
   // 슬라이더로 zoom in/out
   const handleSlider = (e) => {
@@ -169,13 +244,43 @@ export default function Home() {
     }
   }, []);
 
+  useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   return (
     <>
       <Head>
         <title>Closiedesk</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <div>
+      {/* 상단 zip.png */}
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: 54, background: "url('/2d/zip.png') repeat-x center center / auto 54px", zIndex: 100 }} />
+      {/* 상단 중앙 슬라이더 */}
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: 54, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 101, pointerEvents: 'none' }}>
+        <div style={{ background: 'rgba(30,30,30,0.95)', borderRadius: 16, padding: '8px 24px', boxShadow: '0 2px 16px #000a', display: 'flex', alignItems: 'center', pointerEvents: 'auto' }}>
+          <input
+            type="range"
+            min={0}
+            max={2}
+            step={1}
+            value={zoomLevel}
+            onChange={handleSlider}
+            style={{ width: 320, marginRight: 18, background: 'transparent' }}
+            className="closie-slider"
+          />
+          <span style={{ color: '#fff', fontWeight: 'bold', fontSize: 20, marginRight: 8 }}>
+            {ZOOM_LABELS[zoomLevel]}
+          </span>
+          <span style={{ color: '#aaa', fontSize: 15 }}>
+            {['도시', '구', '동'][zoomLevel]}
+          </span>
+        </div>
+      </div>
+      <div className="ipad-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', position: 'relative', background: 'url(/back.png) center center / cover no-repeat' }}>
         {/* 상단 뒤로 가기 버튼 */}
         <button
           onClick={() => router.push('/intro')}
@@ -202,110 +307,44 @@ export default function Home() {
             <path d="M15.5 19L8.5 12L15.5 5" stroke="#ff9800" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        {/* 상단 줌 슬라이더 바 (오른쪽 상단) */}
-        <div style={{
-          position: 'fixed',
-          top: 24,
-          right: 32,
-          zIndex: 50,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          pointerEvents: 'none',
-        }}>
-          <div style={{
-            background: 'rgba(30,30,30,0.95)',
-            borderRadius: 16,
-            padding: '18px 32px 12px 32px',
-            boxShadow: '0 2px 16px #000a',
-            display: 'flex',
-            alignItems: 'center',
-            pointerEvents: 'auto',
-            marginBottom: 12,
-          }}>
-            <input
-              type="range"
-              min={0}
-              max={2}
-              step={1}
-              value={zoomLevel}
-              onChange={handleSlider}
-              style={{ width: 320, marginRight: 18, background: 'transparent' }}
-              className="closie-slider"
-            />
-            <span style={{ color: '#fff', fontWeight: 'bold', fontSize: 20, marginRight: 8 }}>
-              {ZOOM_LABELS[zoomLevel]}
-            </span>
-            <span style={{ color: '#aaa', fontSize: 15 }}>
-              {['도시', '구', '동'][zoomLevel]}
-            </span>
-          </div>
-          {/* 카테고리 버튼 */}
-          <div style={{ display: 'flex', gap: 8, pointerEvents: 'auto' }}>
-            {CATEGORIES.map((cat, idx) => (
-              <button
-                key={cat.label}
-                onClick={() => handleCategory(idx)}
+        {/* 우측 상단 고정 bu/1~4.png 이미지 버튼 */}
+        <div style={{ position: 'fixed', top: 64, right: 32, zIndex: 200, display: 'flex', gap: 32, pointerEvents: 'auto' }}>
+          {[1,2,3,4].map((num, idx) => (
+            <button
+              key={num}
+              onClick={() => {
+                handleCategory(idx);
+                setRectCountOverride([2, 2, 2, 2][idx]);
+                setSubCategory(idx);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                outline: 'none',
+                borderRadius: 0,
+                boxShadow: 'none',
+                transition: 'none',
+              }}
+              aria-label={`카테고리 ${idx+1}`}
+            >
+              <img
+                src={`/bu/${num}.png`}
+                alt={`카테고리${idx+1}`}
                 style={{
-                  background: categoryIdx === idx ? '#4faaff' : '#222',
-                  color: categoryIdx === idx ? '#fff' : '#bbb',
+                  width: 180,
+                  height: 180,
+                  objectFit: 'contain',
+                  borderRadius: 0,
                   border: 'none',
-                  borderRadius: 8,
-                  padding: '8px 16px',
-                  fontWeight: 'bold',
-                  fontSize: 15,
-                  cursor: 'pointer',
-                  boxShadow: categoryIdx === idx ? '0 2px 8px #4faaff88' : 'none',
-                  transition: 'all 0.2s',
+                  background: 'none',
+                  transition: 'none',
+                  display: 'block',
                 }}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-          {/* 하위 옵션 버튼 애니메이션 */}
-          {subOptions.length > 0 && (
-            <div style={{
-              display: 'flex',
-              gap: 8,
-              marginTop: 18,
-              justifyContent: 'center',
-              opacity: subAnim ? 1 : 0,
-              transform: subAnim ? 'translateY(0)' : 'translateY(20px)',
-              transition: 'opacity 0.4s, transform 0.4s',
-              pointerEvents: 'auto',
-            }}>
-              {subOptions.map((opt, i) => (
-                <button
-                  key={opt}
-                  onClick={() => {
-                    setSubCategory(opt);
-                    if (rectCount > 1) {
-                      setRectCountOverride(prev => {
-                        const current = prev ?? rectCount;
-                        return Math.max(1, Math.floor(current / 2));
-                      });
-                    }
-                  }}
-                  style={{
-                    background: '#ff9800',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 8,
-                    padding: '8px 16px',
-                    fontWeight: 'bold',
-                    fontSize: 15,
-                    boxShadow: '0 2px 8px #ff980055',
-                    cursor: 'pointer',
-                    letterSpacing: 1,
-                    transition: 'background 0.2s',
-                  }}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          )}
+              />
+            </button>
+          ))}
         </div>
         <MovingRects
           zoomLevel={zoomLevel}
@@ -315,60 +354,30 @@ export default function Home() {
           categoryLabel={categoryIdx !== null ? CATEGORIES[categoryIdx].label : undefined}
         />
         <RequireCategoryModal open={showRequireCategory} onClose={() => setShowRequireCategory(false)} />
-        {showGuide && <ControlGuideModal onClose={() => setShowGuide(false)} />}
       </div>
-      <style jsx global>{`
-        .closie-slider {
-          accent-color: #4faaff;
-        }
-        .closie-slider::-webkit-slider-thumb {
-          background: #4faaff;
-          border: 3px solid #fff;
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          box-shadow: 0 2px 8px #4faaff55;
-          cursor: pointer;
-          -webkit-appearance: none;
-          appearance: none;
-        }
-        .closie-slider::-webkit-slider-runnable-track {
-          background: #ff9800;
-          height: 10px;
-          border-radius: 8px;
-        }
-        .closie-slider::-moz-range-thumb {
-          background: #4faaff;
-          border: 3px solid #fff;
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          box-shadow: 0 2px 8px #4faaff55;
-          cursor: pointer;
-        }
-        .closie-slider::-moz-range-track {
-          background: #ff9800;
-          height: 10px;
-          border-radius: 8px;
-        }
-        .closie-slider::-ms-thumb {
-          background: #4faaff;
-          border: 3px solid #fff;
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          box-shadow: 0 2px 8px #4faaff55;
-          cursor: pointer;
-        }
-        .closie-slider::-ms-fill-lower,
-        .closie-slider::-ms-fill-upper {
-          background: #ff9800;
-          border-radius: 8px;
-        }
-        .closie-slider:focus {
-          outline: none;
-        }
-      `}</style>
+      {/* 하단 안내문구: 박스 없이 흰색 텍스트, 세 줄로 구성 */}
+      <div style={{
+        position: 'fixed',
+        left: '50%',
+        bottom: 40,
+        transform: 'translateX(-50%)',
+        fontSize: 20,
+        lineHeight: 1.7,
+        color: '#fff',
+        fontWeight: 600,
+        textAlign: 'center',
+        zIndex: 9999,
+        letterSpacing: 0.2,
+        textShadow: '0 2px 8px #000a',
+        whiteSpace: 'pre-line',
+      }}>
+        상단 바를 드래그(터치/마우스)하거나{`\n`}
+        카테고리를 선택해 나와 더 잘 맞을 클로지를 만나보세요{`\n`}
+        <span style={{ fontSize: 15, color: '#fff', opacity: 0.7 }}>(서울 → 성북구 → 석관동, 카테고리별 분류)</span>
+      </div>
+      {/* 좌측 위, 우측 위 오렌지색 안내문구 */}
+      <div style={{ position: 'fixed', top: 16, left: 32, color: '#ff9800', fontWeight: 'bold', fontSize: 22, zIndex: 300, textShadow: '0 2px 8px #fff8' }}>먼 클로지까지 확인</div>
+      <div style={{ position: 'fixed', top: 16, right: 32, color: '#ff9800', fontWeight: 'bold', fontSize: 22, zIndex: 300, textShadow: '0 2px 8px #fff8' }}>가까운 클로지</div>
     </>
   );
 } 
