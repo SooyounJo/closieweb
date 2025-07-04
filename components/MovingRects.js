@@ -22,8 +22,8 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
   const router = useRouter();
   const zoom = ZOOM_LEVELS[zoomLevel] || ZOOM_LEVELS[0];
   const rects = rectCount ?? zoom.rects;
-  const rectWidth = 240;
-  const rectHeight = 480;
+  const rectWidth = 216;
+  const rectHeight = 432;
   const gap = rectWidth * 0.2;
   const railLength = rects * (rectWidth + gap);
 
@@ -33,13 +33,22 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
   useEffect(() => {
     // 카테고리/소카테고리/rects가 바뀔 때마다 rectsData를 항상 2d 이미지로 초기화
     setRectsData(Array.from({ length: rects }, (_, i) => {
+      let imgIdx = i;
+      if (typeof subCategory === 'number') {
+        if (subCategory === 0) imgIdx = i % 3 + 1; // bu/1: 1~3
+        else if (subCategory === 1) imgIdx = i % 3 + 4; // bu/2: 4~6
+        else if (subCategory === 2) imgIdx = i % 3 + 7; // bu/3: 7~9
+        else if (subCategory === 3) imgIdx = i % 3 + 10; // bu/4: 10~12
+      } else {
+        imgIdx = (i % 10) + 1;
+      }
       const distanceRank = i + 1;
       const distanceLabel = i === 0 ? '가장 가까움' : i === rects - 1 ? '가장 멀리 있음' : `${distanceRank}번째로 가까움`;
       const lat = zoom.baseLat + (i - rects / 2) * 0.002;
       const lng = zoom.baseLng + (i - rects / 2) * 0.002;
       const keyword = zoom.keyword;
       return {
-        img: `/2d/${(i % 10) + 1}.png`,
+        img: `/2d/${imgIdx}.png`,
         desc: `${keyword} 지역 ${distanceLabel}의 추천 옷입니다.`,
         lat, lng, distanceLabel, keyword, idx: i
       };
@@ -110,11 +119,29 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
       return;
     }
     setActiveRect(i); // 중앙 이동
-    // 옷장 클릭 시 bu/1~4에 따라 각 fullview 페이지로 이동
-    if (typeof subCategory === 'number') {
-      const page = ['/fullview1','/fullview2','/fullview3','/fullview4'][subCategory];
-      if (page) router.push(page);
+    // bu1: 무조건 fullview1
+    if (subCategory === 0) {
+      router.push('/fullview1');
+      return;
     }
+    // bu2: 옷장 2개면 각각 fullview2-1, fullview2-2
+    if (subCategory === 1 && rectCount === 2) {
+      if (i === 0) router.push('/fullview2-1');
+      else router.push('/fullview2-2');
+      return;
+    }
+    // bu3: 옷장 2개면 각각 fullview3-1, fullview3-2(go1, go2)
+    if (subCategory === 2 && rectCount === 2) {
+      if (i === 0) router.push('/fullview3-1');
+      else router.push('/fullview3-2');
+      return;
+    }
+    // bu4: 기존대로 fullview4
+    if (subCategory === 3) {
+      router.push('/fullview4');
+      return;
+    }
+    // 예외: 나머지는 아무 동작 없음
   };
 
   // map.png 고정 박스 조건부 렌더링

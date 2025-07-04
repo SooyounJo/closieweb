@@ -11,13 +11,12 @@ export default function FullView1() {
     <div
       style={{
         position: 'fixed', left: 0, top: 0, width: '100vw', height: '100vh',
-        background: '#ff9800', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+        background: '#ff9800', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'default',
         transition: 'background 1.5s',
         opacity: fade ? 1 : 0,
         transitionProperty: 'opacity, background',
         transitionDuration: '1.5s',
       }}
-      onClick={() => router.back()}
     >
       {/* 뒤로가기 버튼 */}
       <button
@@ -42,7 +41,7 @@ export default function FullView1() {
       >
         다른 옷과 만나기
       </button>
-      <img src="/new/comon.png" alt="full" style={{ width: 'auto', height: '100vh', objectFit: 'contain', maxWidth: '100vw', maxHeight: '100vh' }} />
+      <img src={'/new/comon.png'} alt="full" style={{ width: 'auto', height: '100vh', objectFit: 'contain', maxWidth: '100vw', maxHeight: '100vh' }} />
     </div>
   );
 } 

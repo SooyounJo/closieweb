@@ -1,11 +1,9 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-const imgs = ['/new/foma.png','/new/foma2.png'];
-export default function FullView4() {
+export default function FullView32() {
   const router = useRouter();
-  const [img, setImg] = useState(imgs[0]);
   const [fade, setFade] = useState(false);
-  useEffect(()=>{ setImg(imgs[Math.floor(Math.random()*imgs.length)]); setFade(true); return () => setFade(false); },[]);
+  useEffect(() => { setFade(true); return () => setFade(false); }, []);
   return (
     <div
       style={{
@@ -40,7 +38,7 @@ export default function FullView4() {
       >
         다른 옷과 만나기
       </button>
-      <img src={img} alt="full" style={{ width: 'auto', height: '100vh', objectFit: 'contain', maxWidth: '100vw', maxHeight: '100vh' }} />
+      <img src={'/new/go2.png'} alt="full" style={{ width: 'auto', height: '100vh', objectFit: 'contain', maxWidth: '100vw', maxHeight: '100vh' }} />
     </div>
   );
 } 
