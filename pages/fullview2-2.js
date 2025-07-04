@@ -38,7 +38,7 @@ export default function FullView22() {
       >
         다른 옷과 만나기
       </button>
-      <img src={'/new/tr2.png'} alt="full" style={{ width: 'auto', height: '100vh', objectFit: 'contain', maxWidth: '100vw', maxHeight: '100vh' }} />
+      <img src={'/new/tr2.png'} alt="full" style={{ width: '100vw', height: '100vh', objectFit: 'cover', maxWidth: '100vw', maxHeight: '100vh' }} />
     </div>
   );
 } 

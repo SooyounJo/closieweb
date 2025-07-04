@@ -122,6 +122,47 @@ function RequireCategoryModal({ open, onClose }) {
   );
 }
 
+function PointGuideModal({ open, onClose }) {
+  if (!open) return null;
+  return (
+    <div style={{
+      position: 'fixed', left: 0, top: 0, width: '100vw', height: '100vh',
+      background: 'rgba(10,20,40,0.55)', zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div style={{
+        background: 'rgba(255,255,255,0.95)', borderRadius: 24, padding: '40px 32px 32px 32px', color: '#222',
+        fontSize: 17, fontWeight: 500, textAlign: 'center', boxShadow: '0 8px 32px #000a', maxWidth: 340, lineHeight: 1.7,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+      }}>
+        <div style={{ marginBottom: 18 }}>
+          <img src="/point.png" alt="슬라이더 포인트" style={{ width: 80, height: 80, filter: 'drop-shadow(0 0 16px #ff9800)', animation: 'glow 1.2s infinite alternate' }} />
+        </div>
+        <div style={{ marginBottom: 16, fontWeight: 700, fontSize: 18, color: '#ff9800' }}>
+          이 버튼을 눌러 움직여보세요!
+        </div>
+        <div style={{ fontSize: 15, color: '#444', marginBottom: 18 }}>
+          슬라이더를 좌우로 움직이면<br/>가깝고 먼 클로지를 다양하게 만날 수 있어요.
+        </div>
+        <button
+          onClick={onClose}
+          style={{
+            marginTop: 10, background: '#ff9800', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 32px',
+            fontSize: 17, fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 2px 8px #ff980055',
+          }}
+        >
+          확인
+        </button>
+      </div>
+      <style>{`
+        @keyframes glow {
+          0% { filter: drop-shadow(0 0 0px #ff9800); }
+          100% { filter: drop-shadow(0 0 32px #ff9800); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 // 상단 zip.png 위에서 point.png를 드래그해 zoomLevel을 조절하는 컴포넌트
 function SliderPoint({ zipWidth, zoomLevel, setZoomLevel }) {
   // 슬라이더 구간: 0~1 (연속값)
@@ -172,7 +213,7 @@ function SliderPoint({ zipWidth, zoomLevel, setZoomLevel }) {
         alt="슬라이더 포인트"
         style={{
           position: 'absolute',
-          top: 24, // zip.png 하단으로 내림
+          top: 8, // zip.png와 더 가깝게 위로 올림
           left: getLeft(zoomLevel) - 57, // 중앙 정렬
           width: 114,
           height: 114,
@@ -205,6 +246,7 @@ export default function Home() {
   const [windowWidth, setWindowWidth] = useState(1200);
   const [fullImage, setFullImage] = useState(null);
   const [bgOrange, setBgOrange] = useState(false);
+  const [showPointGuide, setShowPointGuide] = useState(true);
 
   const BU_IMAGES = [
     ['/new/comon.png'],
@@ -279,6 +321,7 @@ export default function Home() {
         <title>Closiedesk</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
+      <PointGuideModal open={showPointGuide} onClose={() => setShowPointGuide(false)} />
       {/* 상단 zip.png */}
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: 38, background: "url('/2d/zip.png') repeat-x center center / auto 38px", zIndex: 100 }} />
       {/* 슬라이더 포인트(버튼)만 zip.png 위에 표시 */}
@@ -366,7 +409,7 @@ export default function Home() {
         textShadow: '0 2px 8px #000a',
         whiteSpace: 'pre-line',
       }}>
-        슬라이더를 움직여 가깝고 먼 클로지를 다양하게 만나보고,\n패치를 선택해 나와 더 잘 맞을 클로지를 만나보세요
+        슬라이더를 움직여 가깝고 먼 클로지를 다양하게 만나보고, 패치를 선택해 나와 더 잘 맞을 클로지를 만나보세요
       </div>
       {/* 좌측 위, 우측 위 오렌지색 안내문구 */}
       <div style={{ position: 'fixed', top: 80, left: 32, color: '#ff9800', fontWeight: 'bold', fontSize: 22, zIndex: 300, textShadow: '0 2px 8px #fff8' }}>가까운 클로지</div>

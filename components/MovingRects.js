@@ -124,9 +124,10 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
       router.push('/fullview1');
       return;
     }
-    // bu2: 옷장 2개면 각각 fullview2-1, fullview2-2
-    if (subCategory === 1 && rectCount === 2) {
-      if (i === 0) router.push('/fullview2-1');
+    // bu2: 옷장 2~3개면 랜덤으로 fullview2-1, fullview2-2
+    if (subCategory === 1 && (rectCount === 2 || rectCount === 3)) {
+      const rand = Math.random() < 0.5 ? 0 : 1;
+      if ((rectCount === 2 && i === 0) || (rectCount === 3 && rand === 0)) router.push('/fullview2-1');
       else router.push('/fullview2-2');
       return;
     }
@@ -147,6 +148,18 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
   // map.png 고정 박스 조건부 렌더링
   const is2dImg = img => /^\/2d\/[1-9]0?\.png$/.test(img);
   const hasMappedImg = rectsData.length > 0 && rectsData.some(r => !is2dImg(r.img));
+
+  // zip.png(레일)과 사각형 컨테이너의 top/marginTop을 window.innerHeight 기준으로 동기화
+  const [zipTop, setZipTop] = useState(240);
+  useEffect(() => {
+    function updateZipTop() {
+      // 상단에서 18% 지점에 zip.png와 옷장이 위치하도록 (노트북/패드 모두 자연스럽게)
+      setZipTop(Math.round(window.innerHeight * 0.18));
+    }
+    updateZipTop();
+    window.addEventListener('resize', updateZipTop);
+    return () => window.removeEventListener('resize', updateZipTop);
+  }, []);
 
   return (
     <div style={{
@@ -183,14 +196,14 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
         position: 'relative',
         justifyContent: 'center',
         zIndex: 12,
-        marginTop: 240,
+        marginTop: zipTop, // zip.png와 동일하게
       }}>
         {/* 레일 (위쪽) */}
         <div
           style={{
             position: 'fixed',
             left: 0,
-            top: '240px',
+            top: zipTop, // zip.png와 동일하게
             width: '100vw',
             height: 54,
             backgroundImage: "url('/2d/zip.png')",
