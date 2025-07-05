@@ -40,7 +40,7 @@ export default function FullView4() {
       >
         다른 옷과 만나기
       </button>
-      <img src={'/new/foma.png'} alt="full" style={{ width: '100vw', height: '100vh', objectFit: 'cover', maxWidth: '100vw', maxHeight: '100vh' }} />
+      <img src={'/new/foma.png'} alt="full" style={{ height: '100vh', width: 'auto', objectFit: 'contain', display: 'block', margin: '0 auto' }} />
     </div>
   );
 } 
