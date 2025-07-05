@@ -3,7 +3,16 @@ import { useEffect, useState } from 'react';
 export default function FullView32() {
   const router = useRouter();
   const [fade, setFade] = useState(false);
+  const [showTaggingGuide, setShowTaggingGuide] = useState(false);
   useEffect(() => { setFade(true); return () => setFade(false); }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowTaggingGuide(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => router.push('/intro'), 420000);
+    return () => clearTimeout(timer);
+  }, []);
   return (
     <div
       style={{
@@ -15,6 +24,21 @@ export default function FullView32() {
         transitionDuration: '1.5s',
       }}
     >
+      {showTaggingGuide && (
+        <div style={{
+          position: 'fixed',
+          left: 0,
+          top: '20%',
+          background: 'rgba(0,0,0,0.7)',
+          color: '#fff',
+          padding: '24px 32px',
+          borderRadius: '16px',
+          fontSize: '2rem',
+          zIndex: 1000
+        }}>
+          좌측 클로지 케이스에 붙어있는 패치에<br/>핸드폰을 태깅해보세요!
+        </div>
+      )}
       {/* 뒤로가기 버튼 */}
       <button
         onClick={e => { e.stopPropagation(); router.back(); }}
