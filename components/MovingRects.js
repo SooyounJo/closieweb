@@ -675,44 +675,7 @@ export default function MovingRects({ zoomLevel, rectCount, onRequireCategory, s
         })}
         {/* 하단 거리 라벨 박스 (옷장이 3개 이상일 때만 표시) */}
         {rects > 2 ? (
-          <div style={{
-            position: 'absolute',
-            left: 0,
-            bottom: -70,
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            pointerEvents: 'none',
-            zIndex: 30,
-          }}>
-            <div style={{
-              background: 'rgba(255,255,255,0.65)',
-              color: '#222',
-              fontSize: 18,
-              fontWeight: 'bold',
-              borderRadius: 16,
-              padding: '8px 24px',
-              boxShadow: '0 2px 8px #0002',
-              marginLeft: 8,
-              userSelect: 'none',
-            }}>
-              먼 곳
-            </div>
-            <div style={{
-              background: 'rgba(255,255,255,0.65)',
-              color: '#222',
-              fontSize: 18,
-              fontWeight: 'bold',
-              borderRadius: 16,
-              padding: '8px 24px',
-              boxShadow: '0 2px 8px #0002',
-              marginRight: 8,
-              userSelect: 'none',
-            }}>
-              가까운 곳
-            </div>
-          </div>
+          null
         ) : null}
       </div>
       {/* map.png 고정 박스 */}

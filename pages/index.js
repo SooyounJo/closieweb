@@ -163,18 +163,19 @@ function PointGuideModal({ open, onClose }) {
   );
 }
 
+// 1. 슬라이더 문구 위치/방향 변경 및 안내 추가
+// 2. 슬라이더/지퍼 크기 확대
+// 3. 옷장 영역 드래그로도 zoomLevel 조정
+
 // 상단 zip.png 위에서 point.png를 드래그해 zoomLevel을 조절하는 컴포넌트
 function SliderPoint({ zipWidth, zoomLevel, setZoomLevel }) {
-  // 슬라이더 구간: 0~1 (연속값)
   const min = 0, max = 1;
   const [dragging, setDragging] = React.useState(false);
-  // 슬라이더 위치 계산
   const getLeft = (level) => {
-    const margin = 60; // zip.png 양 끝 여백
+    const margin = 60;
     const usable = zipWidth - margin * 2;
     return margin + usable * level;
   };
-  // 드래그 핸들러
   const onDown = (e) => {
     setDragging(true);
     document.body.style.userSelect = 'none';
@@ -207,16 +208,19 @@ function SliderPoint({ zipWidth, zoomLevel, setZoomLevel }) {
     };
   }, [dragging]);
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: 138, zIndex: 99999, pointerEvents: 'none' }}>
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: 180, zIndex: 99999, pointerEvents: 'none' }}>
+      {/* 지퍼 크기 확대 */}
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: 60, background: "url('/2d/zip.png') repeat-x center center / auto 60px", zIndex: 100 }} />
+      {/* 슬라이더 포인트(버튼) 크기 확대 */}
       <img
         src="/point.png"
         alt="슬라이더 포인트"
         style={{
           position: 'absolute',
-          top: 8, // zip.png와 더 가깝게 위로 올림
-          left: getLeft(zoomLevel) - 57, // 중앙 정렬
-          width: 114,
-          height: 114,
+          top: 8,
+          left: getLeft(zoomLevel) - 80,
+          width: 160,
+          height: 160,
           zIndex: 99999,
           cursor: 'grab',
           pointerEvents: 'auto',
@@ -227,6 +231,54 @@ function SliderPoint({ zipWidth, zoomLevel, setZoomLevel }) {
         onTouchStart={onDown}
         draggable={false}
       />
+    </div>
+  );
+}
+
+// 옷장 영역 드래그로도 zoomLevel 조정
+function WardrobeDraggableArea({ children, setZoomLevel, windowWidth }) {
+  const dragging = React.useRef(false);
+  const startX = React.useRef(0);
+  const lastZoom = React.useRef(0);
+  const onDown = (e) => {
+    dragging.current = true;
+    startX.current = e.touches ? e.touches[0].clientX : e.clientX;
+    lastZoom.current = null;
+    document.body.style.userSelect = 'none';
+  };
+  const onMove = (e) => {
+    if (!dragging.current) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const dx = clientX - startX.current;
+    let newZoom = (dx / windowWidth) + (lastZoom.current ?? 0.5);
+    newZoom = Math.max(0, Math.min(1, newZoom));
+    setZoomLevel(newZoom);
+    lastZoom.current = newZoom;
+  };
+  const onUp = () => {
+    dragging.current = false;
+    document.body.style.userSelect = '';
+  };
+  React.useEffect(() => {
+    if (!dragging.current) return;
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchend', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchend', onUp);
+    };
+  }, []);
+  return (
+    <div
+      style={{ width: '100vw', height: '100vh', position: 'relative', zIndex: 10 }}
+      onMouseDown={onDown}
+      onTouchStart={onDown}
+    >
+      {children}
     </div>
   );
 }
@@ -287,14 +339,12 @@ export default function Home() {
   let showRegion = null;
   if (categoryIdx !== null) {
     rectCount = rectCountOverride ?? CATEGORIES[categoryIdx].rects;
-    // 옷장이 1개만 남았을 때 지역명 표시
     if (rectCount === 1) {
-      // zoomLevel에 따라 지역명 결정 (ZOOM_LABELS와 동일)
       showRegion = ZOOM_LABELS[Math.round(zoomLevel * 2)];
     }
   } else {
-    // 슬라이더 위치에 따라 옷장 개수: 좌측(1개)~우측(최대 12개)
-    rectCount = Math.round(1 + zoomLevel * 11); // 0~1 -> 1~12
+    // 좌측(zoomLevel=0)에서 옷장 최대, 우측(zoomLevel=1)에서 최소
+    rectCount = Math.round(12 - zoomLevel * 11); // 0~1 -> 12~1
   }
 
   // 카테고리 변경 시 옷장 수 초기화
@@ -326,73 +376,75 @@ export default function Home() {
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: 38, background: "url('/2d/zip.png') repeat-x center center / auto 38px", zIndex: 100 }} />
       {/* 슬라이더 포인트(버튼)만 zip.png 위에 표시 */}
       <SliderPoint zipWidth={windowWidth} zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
-      <div className="ipad-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', position: 'relative', background: bgOrange ? '#ff9800' : 'url(/back.png) center center / cover no-repeat', transition: 'background 0.3s' }}>
-        {/* 우측 상단 고정 bu/1~4.png 이미지 버튼 */}
-        <div style={{ position: 'fixed', top: 64, left: '50%', transform: 'translateX(-50%)', zIndex: 200, display: 'flex', gap: 32, pointerEvents: 'auto' }}>
-          {[1,2,3,4].map((num, idx) => (
-            <button
-              key={num}
-              onClick={() => {
-                handleCategory(idx);
-                setRectCountOverride([2, 2, 2, 2][idx]);
-                setSubCategory(idx);
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                outline: 'none',
-                borderRadius: 0,
-                boxShadow: 'none', // 노란 박스 제거
-                transition: 'transform 0.18s, filter 0.18s',
-                position: 'relative',
-                top: idx === 3 ? -32 : 0,
-                filter: categoryIdx !== null && categoryIdx !== idx ? 'grayscale(100%) brightness(0.7)' : 'none',
-                transform: categoryIdx === idx ? 'scale(1.18)' : 'none',
-                zIndex: categoryIdx === idx ? 10 : 1,
-              }}
-              aria-label={`카테고리 ${idx+1}`}
-              onMouseEnter={e => {
-                if (categoryIdx !== idx) {
-                  e.currentTarget.style.transform = 'scale(1.08)';
-                  e.currentTarget.style.filter = 'none';
-                }
-              }}
-              onMouseLeave={e => {
-                if (categoryIdx !== idx) {
-                  e.currentTarget.style.transform = '';
-                  e.currentTarget.style.filter = 'grayscale(100%) brightness(0.7)';
-                }
-              }}
-            >
-              <img
-                src={`/bu/${num}.png`}
-                alt={`카테고리${idx+1}`}
-                style={{
-                  width: 180,
-                  height: 180,
-                  objectFit: 'contain',
-                  borderRadius: 0,
-                  border: 'none',
-                  background: 'none',
-                  transition: 'transform 0.18s, filter 0.18s',
-                  display: 'block',
+      <WardrobeDraggableArea setZoomLevel={setZoomLevel} windowWidth={windowWidth}>
+        <div className="ipad-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', position: 'relative', background: bgOrange ? '#ff9800' : 'url(/back.png) center center / cover no-repeat', transition: 'background 0.3s' }}>
+          {/* 우측 상단 고정 bu/1~4.png 이미지 버튼 */}
+          <div style={{ position: 'fixed', top: 64, left: '50%', transform: 'translateX(-50%)', zIndex: 200, display: 'flex', gap: 32, pointerEvents: 'auto' }}>
+            {[1,2,3,4].map((num, idx) => (
+              <button
+                key={num}
+                onClick={() => {
+                  handleCategory(idx);
+                  setRectCountOverride([2, 2, 2, 2][idx]);
+                  setSubCategory(idx);
                 }}
-              />
-            </button>
-          ))}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  outline: 'none',
+                  borderRadius: 0,
+                  boxShadow: 'none', // 노란 박스 제거
+                  transition: 'transform 0.18s, filter 0.18s',
+                  position: 'relative',
+                  top: idx === 3 ? -32 : 0,
+                  filter: categoryIdx !== null && categoryIdx !== idx ? 'grayscale(100%) brightness(0.7)' : 'none',
+                  transform: categoryIdx === idx ? 'scale(1.18)' : 'none',
+                  zIndex: categoryIdx === idx ? 10 : 1,
+                }}
+                aria-label={`카테고리 ${idx+1}`}
+                onMouseEnter={e => {
+                  if (categoryIdx !== idx) {
+                    e.currentTarget.style.transform = 'scale(1.08)';
+                    e.currentTarget.style.filter = 'none';
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (categoryIdx !== idx) {
+                    e.currentTarget.style.transform = '';
+                    e.currentTarget.style.filter = 'grayscale(100%) brightness(0.7)';
+                  }
+                }}
+              >
+                <img
+                  src={`/bu/${num}.png`}
+                  alt={`카테고리${idx+1}`}
+                  style={{
+                    width: 180,
+                    height: 180,
+                    objectFit: 'contain',
+                    borderRadius: 0,
+                    border: 'none',
+                    background: 'none',
+                    transition: 'transform 0.18s, filter 0.18s',
+                    display: 'block',
+                  }}
+                />
+              </button>
+            ))}
+          </div>
+          <MovingRects
+            zoomLevel={zoomLevel}
+            rectCount={rectCount}
+            subCategory={subCategory}
+            onRequireCategory={subCategory === null ? () => setShowRequireCategory(true) : undefined}
+            categoryLabel={categoryIdx !== null ? CATEGORIES[categoryIdx].label : undefined}
+            onWardrobeClick={handleWardrobeClick}
+          />
+          <RequireCategoryModal open={showRequireCategory} onClose={() => setShowRequireCategory(false)} />
         </div>
-        <MovingRects
-          zoomLevel={zoomLevel}
-          rectCount={rectCount}
-          subCategory={subCategory}
-          onRequireCategory={subCategory === null ? () => setShowRequireCategory(true) : undefined}
-          categoryLabel={categoryIdx !== null ? CATEGORIES[categoryIdx].label : undefined}
-          onWardrobeClick={handleWardrobeClick}
-        />
-        <RequireCategoryModal open={showRequireCategory} onClose={() => setShowRequireCategory(false)} />
-      </div>
+      </WardrobeDraggableArea>
       {/* 하단 안내문구: 박스 없이 흰색 텍스트, 세 줄로 구성 */}
       <div style={{
         position: 'fixed',

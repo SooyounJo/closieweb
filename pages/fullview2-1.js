@@ -1,30 +1,27 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
-function TaggingGuideModal({ open, onClose }) {
+function TaggingGuideModal({ open }) {
   if (!open) return null;
   return (
     <div style={{
       position: 'fixed', left: 0, top: 0, width: '100vw', height: '100vh',
-      background: 'rgba(10,20,40,0.55)', zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'rgba(10,20,40,0.55)', zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
     }}>
       <div style={{
-        background: 'rgba(255,255,255,0.95)', borderRadius: 24, padding: '40px 32px 32px 32px', color: '#222',
-        fontSize: 17, fontWeight: 500, textAlign: 'center', boxShadow: '0 8px 32px #000a', maxWidth: 340, lineHeight: 1.7,
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        background: 'rgba(255,255,255,0.97)', borderRadius: 32, padding: '56px 48px 48px 48px', color: '#222',
+        fontSize: 22, fontWeight: 500, textAlign: 'center', boxShadow: '0 12px 48px #000a', maxWidth: 440, lineHeight: 1.7,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: 80, position: 'relative',
       }}>
-        <div style={{ marginBottom: 16, fontWeight: 700, fontSize: 18, color: '#ff9800' }}>
-          다음 좌측 태깅 인터랙션을 통해<br/>옷의 디테일한 히스토리를 구경해보세요!
+        <svg width="120" height="120" viewBox="0 0 120 120" style={{ position: 'absolute', left: -110, top: '50%', transform: 'translateY(-50%)' }}>
+          <polyline points="120,60 20,20 40,60 20,100 120,60" fill="#ff9800" stroke="#ff9800" strokeWidth="4" />
+        </svg>
+        <div style={{ marginBottom: 24, fontWeight: 700, fontSize: 28, color: '#ff9800' }}>
+          좌측 클로지 케이스에 붙어있는 패치에<br/>핸드폰을 태깅해보세요!
         </div>
-        <button
-          onClick={onClose}
-          style={{
-            marginTop: 10, background: '#ff9800', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 32px',
-            fontSize: 17, fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 2px 8px #ff980055',
-          }}
-        >
-          확인
-        </button>
+        <div style={{ fontSize: 18, color: '#444', marginBottom: 0 }}>
+          NFC 태깅이 잘 안될 경우<br/>패치에 핸드폰을 밀착해보세요.
+        </div>
       </div>
     </div>
   );
@@ -35,14 +32,32 @@ export default function FullView21() {
   const [fade, setFade] = useState(false);
   const [showTaggingGuide, setShowTaggingGuide] = useState(false);
   const [isTriangle, setIsTriangle] = useState(false);
+  const idleTimeout = 40000; // 40초
   useEffect(() => { setFade(true); return () => setFade(false); }, []);
   useEffect(() => {
     const timer = setTimeout(() => setShowTaggingGuide(true), 3000);
     return () => clearTimeout(timer);
   }, []);
   useEffect(() => {
-    const timer = setTimeout(() => router.push('/intro'), 420000);
-    return () => clearTimeout(timer);
+    let timer;
+    const resetTimer = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => router.push('/intro'), idleTimeout);
+    };
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('mousedown', resetTimer);
+    window.addEventListener('touchstart', resetTimer);
+    window.addEventListener('keydown', resetTimer);
+    window.addEventListener('scroll', resetTimer);
+    resetTimer();
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('mousedown', resetTimer);
+      window.removeEventListener('touchstart', resetTimer);
+      window.removeEventListener('keydown', resetTimer);
+      window.removeEventListener('scroll', resetTimer);
+    };
   }, []);
   return (
     <div
@@ -65,22 +80,7 @@ export default function FullView21() {
           100% { box-shadow: 0 0 80px 40px #ff980088; }
         }
       `}</style>
-      {showTaggingGuide && (
-        <div style={{
-          position: 'fixed',
-          left: 0,
-          top: '20%',
-          background: 'rgba(0,0,0,0.7)',
-          color: '#fff',
-          padding: '24px 32px',
-          borderRadius: '16px',
-          fontSize: '2rem',
-          zIndex: 1000
-        }}>
-          좌측 클로지 케이스에 붙어있는 패치에<br/>핸드폰을 태깅해보세요!
-        </div>
-      )}
-      <TaggingGuideModal open={showTaggingGuide} onClose={() => setShowTaggingGuide(false)} />
+      {showTaggingGuide && <TaggingGuideModal open={showTaggingGuide} />}
       {/* 뒤로가기 버튼 */}
       <button
         onClick={e => { e.stopPropagation(); router.back(); }}
