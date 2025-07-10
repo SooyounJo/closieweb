@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 const imgs = ['/new/foma.png','/new/foma2.png'];
+const idleTimeout = 40000; // 40초
 export default function FullView4() {
   const router = useRouter();
   const [img, setImg] = useState(imgs[0]);
@@ -80,18 +81,35 @@ function TaggingGuideModal({ open }) {
       background: 'rgba(10,20,40,0.55)', zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
     }}>
       <div style={{
-        background: 'rgba(255,255,255,0.97)', borderRadius: 32, padding: '56px 48px 48px 48px', color: '#222',
+        background: 'rgba(255,255,255,0.85)', borderRadius: 32, padding: '56px 48px 48px 48px', color: '#222',
         fontSize: 22, fontWeight: 500, textAlign: 'center', boxShadow: '0 12px 48px #000a', maxWidth: 440, lineHeight: 1.7,
         display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: 80, position: 'relative',
       }}>
         <svg width="120" height="120" viewBox="0 0 120 120" style={{ position: 'absolute', left: -110, top: '50%', transform: 'translateY(-50%)' }}>
           <polyline points="120,60 20,20 40,60 20,100 120,60" fill="#ff9800" stroke="#ff9800" strokeWidth="4" />
         </svg>
-        <div style={{ marginBottom: 24, fontWeight: 700, fontSize: 28, color: '#ff9800' }}>
-          좌측 클로지 케이스에 붙어있는 패치에<br/>핸드폰을 태깅해보세요!
+        <div style={{ marginBottom: 18, fontWeight: 700, fontSize: 20, color: '#ff9800', lineHeight: 1.5, wordBreak: 'keep-all', textAlign: 'center', padding: '0 4px' }}>
+          좌측 클로지 케이스에 붙어있는 패치에 핸드폰을 태깅해보세요!
         </div>
-        <div style={{ fontSize: 18, color: '#444', marginBottom: 0 }}>
+        <div style={{ fontSize: 18, color: '#444', marginBottom: 24 }}>
           NFC 태깅이 잘 안될 경우<br/>패치에 핸드폰을 밀착해보세요.
+        </div>
+        {/* 추가 안내 및 이미지 */}
+        <div style={{
+          marginTop: 16,
+          background: 'rgba(255,240,200,0.85)',
+          borderRadius: 16,
+          padding: '18px 16px 12px 16px',
+          color: '#ff9800',
+          fontSize: 17,
+          fontWeight: 600,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          boxShadow: '0 2px 8px #ff980033',
+        }}>
+          아이폰은 태깅이 잘 되지 않을 수 있습니다.<br/>그럴시에는 큐알코드를 사용해주세요
+          <img src="/code2.png" alt="QR코드" style={{ marginTop: 12, width: 90, height: 90, objectFit: 'contain' }} />
         </div>
       </div>
     </div>
